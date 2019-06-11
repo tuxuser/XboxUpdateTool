@@ -21,27 +21,24 @@ namespace XboxUpdateTool
             }
             else
             {
+                string authtoken = String.Empty;
                 if (!System.IO.File.Exists(args[0]))
                 {
-                    string authtoken = args[0];
-                    CheckForUpdateAsync(authtoken, args[1]).Wait();
+                    authtoken = args[0];
                 }
                 else
                 {
-                    string authtoken = System.IO.File.ReadAllText(args[0]);
-                    CheckForUpdateAsync(authtoken, args[1]).Wait();
-
+                    authtoken = System.IO.File.ReadAllText(args[0]);
                 }
 
+                var client = new DurangoSystemupdateClient(authtoken);
+                CallGetSystemUpdatePackage(client, args[1]).Wait();
             }
-            
         }
         
         static void UpdateInfo(UpdateXboxLive update)
         {
-
             Console.WriteLine($"Update Version: {update.TargetVersionId}\nUpdate Type: {update.UpdateType}");
-
         }
         static async Task DownloadUpdateAsync(UpdateXboxLive update)
         {
@@ -57,38 +54,14 @@ namespace XboxUpdateTool
             }  
         }
 
-        static async Task GetCacheGroupID(string authtoken)
+        static async Task CallGetSystemUpdatePackage(DurangoSystemupdateClient client, string contentId)
         {
-            Uri GetCacheGroupIDUri = new Uri("https://update.xboxlive.com/GetCacheGroupId");
-            HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authtoken);
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-            HttpResponseMessage httpResponse = await client.GetAsync(GetCacheGroupIDUri);
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                string temp = httpResponse.Content.ReadAsStringAsync().Result;
-                var cachejson = CacheGroupId.FromJson(temp);
-                if(cachejson.PurpleCacheGroupId != "")
-                {
-                    Console.WriteLine($"Cache ID Found: {cachejson.PurpleCacheGroupId}");
-
-                }
-
-            }
-
-        }
-
-        async static Task CheckForUpdateAsync(string authtoken, string contentid)
-        {
-            Uri GetSystemUpdatePackageUri = new Uri($"https://update.xboxlive.com/GetSystemUpdatePackage/{contentid}");
-            HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authtoken);
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
-            StringContent content = new StringContent("{\"UpdateMode\":3,\"LicenseProtocol\":4,\"FileIncludeFilter\":[\"updater.xvd\"],\"IgnoreRootLicense\":0}");
-            HttpResponseMessage httpResponse = await client.PostAsync(GetSystemUpdatePackageUri, content);
+            var httpResponse = await client.GetSystemUpdatePackage(contentId);
             if (httpResponse.IsSuccessStatusCode)
             {
                 string update = httpResponse.Content.ReadAsStringAsync().Result;
+                Console.WriteLine(update);
+
                 var updatejson = UpdateXboxLive.FromJson(update);
                 if (updatejson.UpdateType != "None")
                 {
@@ -106,7 +79,48 @@ namespace XboxUpdateTool
             {
                 Console.WriteLine($"update.xboxlive.com error - status code {httpResponse.StatusCode.ToString()}");
             }
-            
+        }
+
+        static async Task CallGetSpecificSystemVersion(DurangoSystemupdateClient client,
+            string unk1, string unk2, string unk3)
+        {
+            var httpResponse = await client.GetSpecificSystemVersion(unk1, unk2, unk3);
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                string update = httpResponse.Content.ReadAsStringAsync().Result;
+                Console.WriteLine(update);
+
+                var updatejson = UpdateXboxLive.FromJson(update);
+                if (updatejson.UpdateType != "None")
+                {
+                    Console.WriteLine("***Update Found***");
+                    UpdateInfo(updatejson);
+                    await DownloadUpdateAsync(updatejson);
+                }
+                else
+                {
+                    Console.WriteLine("No Update Found.");
+                }
+
+            }
+            else
+            {
+                Console.WriteLine($"update.xboxlive.com error - status code {httpResponse.StatusCode.ToString()}");
+            }
+        }
+
+        public async Task CallIsUpdateAvailable(DurangoSystemupdateClient client)
+        {
+            var httpResponse = await client.IsUpdateAvailableBatch();
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                string update = httpResponse.Content.ReadAsStringAsync().Result;
+                Console.WriteLine(update);
+            }
+            else
+            {
+                Console.WriteLine($"update.xboxlive.com error - status code {httpResponse.StatusCode.ToString()}");
+            }
         }
     }
 }
