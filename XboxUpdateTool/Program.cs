@@ -15,9 +15,9 @@ namespace XboxUpdateTool
 
         static void Main(string[] args)
         {
-            if(args.Length < 2)
+            if(args.Length < 3)
             {
-                Console.WriteLine("Usage: XboxUpdateTool.exe authtoken contentid");
+                Console.WriteLine("Usage: XboxUpdateTool.exe authtoken contentid versionId");
             }
             else
             {
@@ -32,7 +32,7 @@ namespace XboxUpdateTool
                 }
 
                 var client = new DurangoSystemupdateClient(authtoken);
-                CallGetSystemUpdatePackage(client, args[1]).Wait();
+                CallIsUpdateAvailable(client, args[1], args[2]).Wait();
             }
         }
         
@@ -59,7 +59,7 @@ namespace XboxUpdateTool
             var httpResponse = await client.GetSystemUpdatePackage(contentId);
             if (httpResponse.IsSuccessStatusCode)
             {
-                string update = httpResponse.Content.ReadAsStringAsync().Result;
+                string update = await httpResponse.Content.ReadAsStringAsync();
                 Console.WriteLine(update);
 
                 var updatejson = UpdateXboxLive.FromJson(update);
@@ -87,7 +87,7 @@ namespace XboxUpdateTool
             var httpResponse = await client.GetSpecificSystemVersion(unk1, unk2, unk3);
             if (httpResponse.IsSuccessStatusCode)
             {
-                string update = httpResponse.Content.ReadAsStringAsync().Result;
+                string update = await httpResponse.Content.ReadAsStringAsync();
                 Console.WriteLine(update);
 
                 var updatejson = UpdateXboxLive.FromJson(update);
@@ -109,12 +109,12 @@ namespace XboxUpdateTool
             }
         }
 
-        public async Task CallIsUpdateAvailable(DurangoSystemupdateClient client)
+        static async Task CallIsUpdateAvailable(DurangoSystemupdateClient client, string contentId, string versionId)
         {
-            var httpResponse = await client.IsUpdateAvailableBatch();
+            var httpResponse = await client.IsUpdateAvailable(contentId, versionId);
             if (httpResponse.IsSuccessStatusCode)
             {
-                string update = httpResponse.Content.ReadAsStringAsync().Result;
+                string update = await httpResponse.Content.ReadAsStringAsync();
                 Console.WriteLine(update);
             }
             else

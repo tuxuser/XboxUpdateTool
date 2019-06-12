@@ -6,8 +6,6 @@ using Newtonsoft.Json;
 
 namespace XboxUpdateTool
 {
- 
-
     public partial class CacheGroupId
     {
         [JsonProperty("CacheGroupId")]
