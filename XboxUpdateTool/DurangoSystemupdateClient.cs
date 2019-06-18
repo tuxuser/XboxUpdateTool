@@ -23,7 +23,10 @@ namespace XboxUpdateTool
         public DurangoSystemupdateClient(string xToken)
         {
             _xToken = xToken;
+
             _httpClient = new HttpClient();
+            _httpClient.DefaultRequestHeaders.Host = "update.xboxlive.com";
+
             _correlationVector = new CorrelationVector();
             _correlationVector.Init();
         }
@@ -42,7 +45,7 @@ namespace XboxUpdateTool
 
         public Task<HttpResponseMessage> IsUpdateAvailable(string contentId, string versionId)
         {
-            Uri IsUpdateAvailableUri = new Uri("https://update.xboxlive.com/IsUpdateAvailable");
+            Uri IsUpdateAvailableUri = new Uri("https://update.xboxlive.com/IsSystemUpdateAvailable");
             IsUpdateAvailableRequest request = new IsUpdateAvailableRequest()
             {
                 UpdateMode = 3,
@@ -57,7 +60,7 @@ namespace XboxUpdateTool
 
         public Task<HttpResponseMessage> IsUpdateAvailableBatch()
         {
-            Uri IsUpdateAvailableBatchUri = new Uri("https://update.xboxlive.com/IsUpdateAvailable/Batch");
+            Uri IsUpdateAvailableBatchUri = new Uri("https://update.xboxlive.com/IsSystemUpdateAvailable/Batch");
 
             var message = new HttpRequestMessage(HttpMethod.Post, IsUpdateAvailableBatchUri);
             message.Content = new StringContent(" ", Encoding.Default, "application/json");

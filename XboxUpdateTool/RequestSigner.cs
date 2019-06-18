@@ -18,7 +18,7 @@ namespace XboxUpdateTool
         {
             var hash = HashRequest(signaturePolicy, timestamp, request);
 
-            byte[] signature = new byte[0];
+            byte[] signature = new byte[0x40];
             if (ecdsaValue != null)
             {
                 /* TODO: Figure out where ecsda is calculated */
