@@ -95,7 +95,7 @@ namespace XboxUpdateTool
             }
 
             /* Last step: Hash null byte */
-            hasher.TransformBlock(new byte[1], 0, 1, null, _);
+            hasher.TransformFinalBlock(new byte[1], 0, 1);
 
             return hasher.Hash;
         }
