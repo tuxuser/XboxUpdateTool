@@ -1,7 +1,7 @@
 # XboxUpdateTool
 
 
-XboxUpdateTool is a C# console application that allows for the downloading of encrypted XBox One updates. When provided with an auth token (Device Token, in the XBL3.0 format) and the content id for an update, XboxUpdateTool will download and label the requested update.
+XboxUpdateTool is a C# console application that allows for the downloading of encrypted XBox One updates. When provided with an auth token (DeviceToken-entitled XSTSToken) and the content id for an update, XboxUpdateTool will download and label the requested update.
 
 
 ### Usage

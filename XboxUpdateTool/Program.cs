@@ -15,31 +15,31 @@ namespace XboxUpdateTool
 
         static void Main(string[] args)
         {
-            if(args.Length < 3)
+            if(args.Length < 2)
             {
-                Console.WriteLine("Usage: XboxUpdateTool.exe authtoken contentid versionId");
+                Console.WriteLine("Usage: XboxUpdateTool.exe xtoken contentid");
+                return;
+            }
+
+            string xtoken = String.Empty;
+            if (!System.IO.File.Exists(args[0]))
+            {
+                xtoken = args[0];
             }
             else
             {
-                string authtoken = String.Empty;
-                if (!System.IO.File.Exists(args[0]))
-                {
-                    authtoken = args[0];
-                }
-                else
-                {
-                    authtoken = System.IO.File.ReadAllText(args[0]);
-                }
-
-                var client = new DurangoSystemupdateClient(authtoken);
-                CallIsUpdateAvailable(client, args[1], args[2]).Wait();
+                xtoken = System.IO.File.ReadAllText(args[0]);
             }
+
+            var client = new DurangoSystemupdateClient(xtoken);
+            CallIsUpdateAvailable(client, args[1], args[2]).GetAwaiter().GetResult();
         }
         
         static void UpdateInfo(UpdateXboxLive update)
         {
             Console.WriteLine($"Update Version: {update.TargetVersionId}\nUpdate Type: {update.UpdateType}");
         }
+
         static async Task DownloadUpdateAsync(UpdateXboxLive update)
         {
             WebClient downloader = new WebClient();
